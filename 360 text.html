@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotated Degree Chart Generator</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* ** CSS STYLING ** */
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            background-color: #f4f4f9;
+        }
+
+        /* The main container to capture as an image */
+        #main-wrapper {
+            display: flex;
+            gap: 40px;
+            padding: 40px; 
+            background-color: white; 
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative; 
+        }
+
+        /* --- Circle Styling --- */
+        #circle-container {
+            width: 350px;
+            height: 350px;
+            position: relative;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background-color: #e0f7fa;
+            margin: 20px; 
+        }
+
+        .segment-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 175px; 
+            height: 1px;
+            background-color: #333;
+            transform-origin: 0 0;
+        }
+
+        /* --- External Degree Label Styling --- */
+        .external-degree-label {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00796b;
+            text-align: center;
+        }
+        
+        /* --- Dynamic Input Text (Inside Circle) Styling --- */
+        .rotated-input-text {
+            position: absolute;
+            width: 80px; 
+            font-size: 14px;
+            text-align: center;
+            color: #004d40;
+            font-weight: 500;
+            pointer-events: none; 
+            white-space: nowrap; /* Prevents wrapping if text is long */
+        }
+        
+        /* --- Input List Styling --- */
+        #input-list-wrapper {
+            padding-top: 20px;
+        }
+        #input-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-item span {
+            font-weight: bold;
+            color: #333;
+            width: 50px; 
+            text-align: right;
+        }
+
+        .list-item input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+        }
+
+        /* --- Button Styling --- */
+        #download-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #download-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Rotated Degree Chart Input</h1>
+    
+
+    <div id="main-wrapper">
+        <div id="circle-container">
+            </div>
+
+        <div id="input-list-wrapper">
+            <h2>Input Text</h2>
+            <div id="input-list">
+                </div>
+        </div>
+    </div>
+
+    <button id="download-button">Download Chart as JPG</button>
+
+    <script>
+        // ** JAVASCRIPT LOGIC **
+        
+        const circleContainer = document.getElementById('circle-container');
+        const inputList = document.getElementById('input-list');
+        const totalSegments = 12;
+        const degreesPerSegment = 360 / totalSegments;
+        
+        // Define key radii (Half of circleContainer width/height)
+        const center = 175; // Center point of the circle (1/2 of 350px)
+        const lineRadius = 175; // Radius for the dividing lines
+        const externalLabelRadius = 195; // Position for the degree label (outside the circle)
+        const textInsideRadius = 140;    // Radius for the input text (closer to the edge)
+        const labelOffset = 15;         // Half-width/height to center the text
+
+        /**
+         * Function to generate the circle divisions and the input list
+         */
+        function initializeChart() {
+            for (let i = 0; i < totalSegments; i++) {
+                const degree = i * degreesPerSegment;
+                
+                // Convert degree to radian for sin/cos. Adjust by -90 to align 0° with the top.
+                const angleRad = (degree - 90) * (Math.PI / 180); 
+
+                // --- 1. Create the dividing line in the circle ---
+                const line = document.createElement('div');
+                line.className = 'segment-line';
+                line.style.transform = `rotate(${degree}deg)`; 
+                circleContainer.appendChild(line);
+
+                // --- 2. Create the EXTERNAL degree label ---
+                const label = document.createElement('div');
+                label.className = 'external-degree-label';
+                label.innerText = `${degree}°`;
+                
+                // Calculate position for the external label
+                const xExt = center + externalLabelRadius * Math.cos(angleRad) - labelOffset; 
+                const yExt = center + externalLabelRadius * Math.sin(angleRad) - labelOffset; 
+
+                label.style.left = `${xExt}px`;
+                label.style.top = `${yExt}px`;
+                circleContainer.appendChild(label);
+                
+                // --- 3. Create the input field in the list ---
+                const listItem = document.createElement('div');
+                listItem.className = 'list-item';
+                listItem.innerHTML = `
+                    <span>${degree}°:</span>
+                    <input 
+                        type="text" 
+                        data-degree="${degree}" 
+                        placeholder="Text for ${degree}°"
+                        oninput="updateCircleText(this)"
+                    >
+                `;
+                inputList.appendChild(listItem);
+
+                // --- 4. Create the corresponding dynamic text element INSIDE the circle ---
+                const circleText = document.createElement('div');
+                circleText.className = 'rotated-input-text';
+                circleText.id = `text-${degree}`;
+                
+                // Calculate position for the text inside the circle, using the larger textInsideRadius
+                const xInt = center + textInsideRadius * Math.cos(angleRad) - 60; 
+                const yInt = center + textInsideRadius * Math.sin(angleRad) - 10; 
+
+                circleText.style.left = `${xInt}px`;
+                circleText.style.top = `${yInt}px`;
+
+                // Rotation logic
+                let rotation = degree + 90; 
+                if (degree >= 90 && degree <= 270) {
+                     rotation += 180;
+                     // Slight adjustment for better look on the bottom half
+                     circleText.style.textAlign = 'right'; 
+                } else {
+                     circleText.style.textAlign = 'left';
+                }
+                
+                // translateX(30px) shifts the text element radially outward, pushing it to the edge of the line
+                circleText.style.transform = `rotate(${rotation}deg) translateX(30px)`; 
+                
+                circleContainer.appendChild(circleText);
+            }
+        }
+
+        /**
+         * Function to update the text inside the circle when the input changes
+         */
+        function updateCircleText(inputElement) {
+            const degree = inputElement.getAttribute('data-degree');
+            const targetTextElement = document.getElementById(`text-${degree}`);
+            targetTextElement.innerText = inputElement.value;
+        }
+
+        /**
+         * Function to handle the image download
+         */
+        document.getElementById('download-button').addEventListener('click', () => {
+            const contentToCapture = document.getElementById('main-wrapper'); 
+
+            html2canvas(contentToCapture, { 
+                scale: 2, 
+                logging: false 
+            }).then(canvas => {
+                const imageURL = canvas.toDataURL('image/jpeg', 0.9); 
+
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = 'rotated_degree_chart.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+
+        // Initialize the chart when the page loads
+        initializeChart();
+    </script>
+</body>
+</html>
