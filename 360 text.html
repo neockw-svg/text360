@@ -13,11 +13,11 @@
         /* ** Global & Layout CSS - Final Design Scheme ** */
         :root {
             /* Color Palette */
-            --primary-color: #2c3e50;      /* Dark Navy/Slate - for headings, main text */
-            --secondary-color-start: #3498db; /* Bright Blue */
-            --secondary-color-end: #2980b9;  /* Darker Blue for Gradient */
-            --background-color: #f4f6f9;   /* Light Gray Background */
-            --card-background: #ffffff;    /* White Cards */
+            --primary-color: #2c3e50;      
+            --secondary-color-start: #3498db; 
+            --secondary-color-end: #2980b9;  
+            --background-color: #f4f6f9;   
+            --card-background: #ffffff;    
             --border-radius: 8px;
             --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -28,19 +28,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px; /* Reduced padding for small screens */
+            padding: 20px; 
             margin: 0;
             min-height: 100vh;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px; /* Reduced margin for small screens */
+            margin-bottom: 20px; 
             color: var(--primary-color);
         }
 
         .header h1 {
-            font-size: 2em; /* Adjusted size for small screens */
+            font-size: 2em; 
             margin-bottom: 5px;
             font-weight: 700;
         }
@@ -51,18 +51,18 @@
             font-weight: 400;
         }
 
-        /* --- Main Content Container (Desktop: Row) --- */
+        /* --- Main Content Container --- */
         .content-container {
             display: flex;
-            flex-direction: column; /* Default stack on mobile */
-            gap: 20px; /* Reduced gap for small screens */
+            flex-direction: column; 
+            gap: 20px; 
             width: 100%;
             max-width: 1200px;
         }
 
         /* --- Chart Wrapper (Left Side) --- */
         #chart-section {
-            width: 100%; /* Full width on mobile */
+            width: 100%; 
             padding: 20px;
             background: var(--card-background);
             border-radius: var(--border-radius);
@@ -70,13 +70,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 350px; /* Reduced minimum height */
-            /* This ensures the chart scales down */
+            min-height: 350px; 
         }
         
         /* --- Input Wrapper (Right Side) --- */
         #input-section {
-            width: 100%; /* Full width on mobile */
+            width: 100%; 
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -90,7 +89,16 @@
             padding: 20px;
         }
 
-        /* --- Download Button --- */
+        .input-card h2 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* --- Download Button with Vertical Gradient --- */
         #download-button {
             width: 100%;
             padding: 15px;
@@ -106,6 +114,10 @@
             box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4); 
         }
 
+        #download-button:hover {
+            opacity: 0.9;
+        }
+
         /* ** Media Query for Desktop (Screen width >= 768px) ** */
         @media (min-width: 768px) {
             .header {
@@ -116,69 +128,41 @@
             }
 
             .content-container {
-                flex-direction: row; /* Switch to side-by-side layout */
+                flex-direction: row; 
                 gap: 30px;
             }
 
             #chart-section {
-                flex: 1; /* Allows the chart section to grow */
+                flex: 1; 
                 width: auto;
                 min-height: 500px;
             }
             
             #input-section {
-                width: 350px; /* Fixed width sidebar on desktop */
+                width: 350px; 
             }
         }
 
-        /* ** Degree Chart Specific Styling (Needs Scaling) ** */
-        /* To make the chart responsive, we scale the main wrapper based on the available space */
+        /* ** Degree Chart Specific Styling ** */
         #main-wrapper {
             position: relative; 
             background-color: white; 
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             border-radius: var(--border-radius);
-            /* Important for scaling: use percentages or max-width */
-            width: 90%; 
-            max-width: 450px; /* Max size on larger screens */
-            padding-top: 90%; /* Creates a square aspect ratio (padding = width) */
+            width: auto;
+            padding: 40px;
         }
 
-        /* All child elements of #main-wrapper must be absolutely positioned */
         #circle-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 100%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 2px solid var(--primary-color); 
-            background-color: #e0f7fa; 
-        }
-        
-        /* The chart elements (lines, degrees, text) now use percentages of the circle's original size
-           to scale correctly. We must adjust their positioning logic in JS/CSS.
-           However, since this is complex trig, we will use a viewport-relative size for the chart elements
-           to handle the positioning without re-calculating all trig logic.
-        */
-        
-        /* The following elements are inside the circle and need fixed sizing relative to the circle's size */
-        /* Since the previous JS used fixed pixel values, we'll revert #circle-container to fixed size 
-           and instead scale the entire #main-wrapper, which is a common trick. */
-
-        #circle-container {
-            /* REVERTING to fixed sizes for consistent JS/Trig logic and scaling the parent */
             width: 350px; 
             height: 350px;
             position: relative;
-            transform: none; /* Reset transform */
-            top: auto;
-            left: auto;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color); 
+            background-color: #e0f7fa; 
             margin: 20px;
         }
-
-        /* --- Re-applying the original fixed-pixel styles for chart integrity --- */
+        
         .segment-line {
             position: absolute;
             top: 50%;
@@ -197,22 +181,24 @@
             text-align: center;
         }
         
+        /* UPDATED STYLING FOR WRAPPING TEXT */
         .rotated-input-text {
             position: absolute;
-            width: 80px; 
-            font-size: 14px;
+            width: 100px; /* Wider box for wrapping */
+            height: auto;
+            font-size: 13px; /* Smaller font for better fit */
+            line-height: 1.2; /* Tighter line spacing */
             text-align: center;
             color: #2980b9; 
             font-weight: 500;
             pointer-events: none; 
-            white-space: nowrap; 
             transform-origin: center; 
+            word-wrap: break-word; 
         }
         
         /* Small Screen Chart Scaling Fix */
         @media (max-width: 500px) {
             #main-wrapper {
-                /* Scale the entire chart container down on very small screens */
                 transform: scale(0.85); 
                 margin: 20px 0;
                 padding: 0;
@@ -221,7 +207,6 @@
                 padding: 10px;
             }
         }
-
 
         /* --- Standard Input List Styles --- */
         .input-card h2 {
@@ -288,7 +273,7 @@
     </div>
 
     <script>
-        // ** JAVASCRIPT LOGIC (No changes, maintains precise positioning) **
+        // ** JAVASCRIPT LOGIC **
         
         const circleContainer = document.getElementById('circle-container');
         const inputList = document.getElementById('input-list');
@@ -351,7 +336,7 @@
                 circleText.id = `text-${degree}`;
                 
                 // Calculate position for the text.
-                const xInt = center + textInsideRadius * Math.cos(angleRad) - 40; 
+                const xInt = center + textInsideRadius * Math.cos(angleRad) - 50; /* Adjusted for 100px width */
                 const yInt = center + textInsideRadius * Math.sin(angleRad) - 10; 
 
                 circleText.style.left = `${xInt}px`;
@@ -364,8 +349,8 @@
                      rotation += 180;
                 } 
                 
-                // Rotate and shift vertically to align with the circumference arc
-                circleText.style.transform = `rotate(${rotation}deg) translateY(-60px) translateX(20px)`; 
+                // ADJUSTED: Rotate and shift vertically to align with the circumference arc
+                circleText.style.transform = `rotate(${rotation}deg) translateY(-70px) translateX(10px)`; 
                 
                 circleContainer.appendChild(circleText);
             }
