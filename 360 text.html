@@ -3,40 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotated Degree Chart Generator</title>
+    <title>Arc-Aligned Degree Chart Generator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        /* ** CSS STYLING ** */
+        /* ** Global & Layout CSS - Final Design Scheme ** */
+        :root {
+            /* Color Palette */
+            --primary-color: #2c3e50;      /* Dark Navy/Slate - for headings, main text */
+            --secondary-color-start: #3498db; /* Bright Blue */
+            --secondary-color-end: #2980b9;  /* Darker Blue for Gradient */
+            --background-color: #f4f6f9;   /* Light Gray Background */
+            --card-background: #ffffff;    /* White Cards */
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: sans-serif;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 30px;
-            background-color: #f4f4f9;
+            padding: 30px 20px;
+            margin: 0;
+            min-height: 100vh;
         }
 
-        /* The main container to capture as an image */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d; 
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        /* --- Main Content Container (Chart + Inputs) --- */
+        .content-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* --- Chart Wrapper (Left Side - Stays White) --- */
+        #chart-section {
+            flex: 1;
+            padding: 30px;
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+        }
+
+        /* --- Input Wrapper (Right Side - Background Applied) --- */
+        #input-section {
+            width: 350px; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Applying the light gray background to the entire section */
+            background-color: var(--background-color); 
+        }
+
+        .input-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+        }
+
+        .input-card h2 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* --- Download Button with Vertical Gradient --- */
+        #download-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            /* Applying the gradient */
+            background-image: linear-gradient(to bottom, var(--secondary-color-start), var(--secondary-color-end));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity 0.3s;
+            margin-top: 20px;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4); /* Blue shadow for depth */
+        }
+
+        #download-button:hover {
+            opacity: 0.9;
+        }
+
+        /* ** Degree Chart Specific Styling ** */
         #main-wrapper {
             display: flex;
-            gap: 40px;
+            justify-content: center;
+            align-items: center;
             padding: 40px; 
             background-color: white; 
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             position: relative; 
+            border-radius: var(--border-radius);
         }
 
-        /* --- Circle Styling --- */
         #circle-container {
             width: 350px;
             height: 350px;
             position: relative;
             border-radius: 50%;
-            border: 2px solid #333;
-            background-color: #e0f7fa;
+            border: 2px solid var(--primary-color); 
+            background-color: #e0f7fa; 
             margin: 20px; 
         }
 
@@ -46,99 +147,96 @@
             left: 50%;
             width: 175px; 
             height: 1px;
-            background-color: #333;
+            background-color: #7f8c8d; 
             transform-origin: 0 0;
         }
 
-        /* --- External Degree Label Styling --- */
         .external-degree-label {
             position: absolute;
             font-size: 16px;
-            font-weight: bold;
-            color: #00796b;
+            font-weight: 700;
+            color: var(--primary-color);
             text-align: center;
         }
         
-        /* --- Dynamic Input Text (Inside Circle) Styling --- */
         .rotated-input-text {
             position: absolute;
             width: 80px; 
             font-size: 14px;
             text-align: center;
-            color: #004d40;
+            color: #2980b9; 
             font-weight: 500;
             pointer-events: none; 
-            white-space: nowrap; /* Prevents wrapping if text is long */
+            white-space: nowrap; 
+            transform-origin: center; 
         }
         
-        /* --- Input List Styling --- */
-        #input-list-wrapper {
-            padding-top: 20px;
-        }
+        /* --- Input List Styling (Inside Right Card) --- */
         #input-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .list-item {
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 0.9em;
         }
 
         .list-item span {
-            font-weight: bold;
-            color: #333;
-            width: 50px; 
+            font-weight: 500;
+            color: var(--primary-color);
+            width: 60px; 
             text-align: right;
         }
 
         .list-item input[type="text"] {
-            padding: 5px;
-            border: 1px solid #ccc;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
             border-radius: 4px;
-            width: 250px;
+            width: calc(100% - 70px);
+            transition: border-color 0.3s;
         }
 
-        /* --- Button Styling --- */
-        #download-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #download-button:hover {
-            background-color: #45a049;
+        .list-item input[type="text"]:focus {
+            border-color: var(--secondary-color-start);
+            outline: none;
         }
     </style>
 </head>
 <body>
 
-    <h1>Rotated Degree Chart Input</h1>
-    
+    <div class="header">
+        <h1>&#x25CF; Arc-Aligned Degree Chart Generator</h1>
+        <p>Input text and download the complete chart as a JPG.</p>
+    </div>
 
-    <div id="main-wrapper">
-        <div id="circle-container">
+    <div class="content-container">
+        
+        <div id="chart-section">
+             <div id="main-wrapper">
+                <div id="circle-container">
+                    </div>
             </div>
+        </div>
 
-        <div id="input-list-wrapper">
-            <h2>Input Text</h2>
-            <div id="input-list">
-                </div>
+        <div id="input-section">
+            <div class="input-card">
+                <h2>Input Text List</h2>
+                <div id="input-list">
+                    </div>
+            </div>
+            
+            <button id="download-button">
+                &#x25BC; Download Chart as JPG
+            </button>
         </div>
     </div>
 
-    <button id="download-button">Download Chart as JPG</button>
-
     <script>
-        // ** JAVASCRIPT LOGIC **
+        // ** JAVASCRIPT LOGIC (The core functionality remains unchanged) **
         
         const circleContainer = document.getElementById('circle-container');
         const inputList = document.getElementById('input-list');
@@ -146,11 +244,11 @@
         const degreesPerSegment = 360 / totalSegments;
         
         // Define key radii (Half of circleContainer width/height)
-        const center = 175; // Center point of the circle (1/2 of 350px)
-        const lineRadius = 175; // Radius for the dividing lines
-        const externalLabelRadius = 195; // Position for the degree label (outside the circle)
-        const textInsideRadius = 140;    // Radius for the input text (closer to the edge)
-        const labelOffset = 15;         // Half-width/height to center the text
+        const center = 175; 
+        const lineRadius = 175; 
+        const externalLabelRadius = 195; 
+        const textInsideRadius = 160;    
+        const labelOffset = 15;         
 
         /**
          * Function to generate the circle divisions and the input list
@@ -189,7 +287,7 @@
                     <input 
                         type="text" 
                         data-degree="${degree}" 
-                        placeholder="Text for ${degree}°"
+                        placeholder="Enter text for ${degree}°"
                         oninput="updateCircleText(this)"
                     >
                 `;
@@ -200,25 +298,22 @@
                 circleText.className = 'rotated-input-text';
                 circleText.id = `text-${degree}`;
                 
-                // Calculate position for the text inside the circle, using the larger textInsideRadius
-                const xInt = center + textInsideRadius * Math.cos(angleRad) - 60; 
+                // Calculate position for the text.
+                const xInt = center + textInsideRadius * Math.cos(angleRad) - 40; 
                 const yInt = center + textInsideRadius * Math.sin(angleRad) - 10; 
 
                 circleText.style.left = `${xInt}px`;
                 circleText.style.top = `${yInt}px`;
 
-                // Rotation logic
-                let rotation = degree + 90; 
+                // Rotation logic for Tangential Placement
+                let rotation = degree; 
+                
                 if (degree >= 90 && degree <= 270) {
                      rotation += 180;
-                     // Slight adjustment for better look on the bottom half
-                     circleText.style.textAlign = 'right'; 
-                } else {
-                     circleText.style.textAlign = 'left';
-                }
+                } 
                 
-                // translateX(30px) shifts the text element radially outward, pushing it to the edge of the line
-                circleText.style.transform = `rotate(${rotation}deg) translateX(30px)`; 
+                // Rotate and shift vertically to align with the circumference arc
+                circleText.style.transform = `rotate(${rotation}deg) translateY(-60px) translateX(20px)`; 
                 
                 circleContainer.appendChild(circleText);
             }
@@ -241,13 +336,14 @@
 
             html2canvas(contentToCapture, { 
                 scale: 2, 
-                logging: false 
+                logging: false,
+                useCORS: true 
             }).then(canvas => {
                 const imageURL = canvas.toDataURL('image/jpeg', 0.9); 
 
                 const link = document.createElement('a');
                 link.href = imageURL;
-                link.download = 'rotated_degree_chart.jpg';
+                link.download = 'arc_aligned_chart.jpg';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
